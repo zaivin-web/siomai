@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,7 +25,17 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                //
+                TextInput::make('name')->required()->maxLength(255),
+                TextInput::make('email')->required()->email()->maxLength(255),
+                TextInput::make('password')
+                    ->required()
+                    ->password(fn (string $context) => $context === 'create')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->maxLength(255),
+                Forms\Components\Select::make('role_id')
+                    ->label('Role')
+                    ->required()
+                    ->relationship('role', 'name'),
             ]);
     }
 
@@ -32,7 +43,7 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('serial_no')->label('No.')->sortable(),
+                TextColumn::make('serial_no')->label('No.')->sortable()->rowIndex(),
                 TextColumn::make('name')->label('Name')->sortable()->searchable(),
                 TextColumn::make('email')->label('Email')->sortable()->searchable(),
                 TextColumn::make('role.name')->label('Role')->sortable()->searchable(),
@@ -41,7 +52,20 @@ class UserResource extends Resource
                 
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('role')
+                    ->label('Role')
+                    ->form([
+                        Forms\Components\Select::make('role_id')
+                            ->relationship('role', 'name')
+                            ->label('Role'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['role_id']) {
+                            $query->where('role_id', $data['role_id']);
+                        }
+                    }),
+
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -56,7 +80,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            
         ];
     }
 
