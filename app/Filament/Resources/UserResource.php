@@ -32,7 +32,12 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('serial_no')->label('No.')->sortable()->searchable(),
+                TextColumn::make('serial_no')->label('No.')->sortable(),
+                TextColumn::make('name')->label('Name')->sortable()->searchable(),
+                TextColumn::make('email')->label('Email')->sortable()->searchable(),
+                TextColumn::make('role.name')->label('Role')->sortable()->searchable(),
+                TextColumn::make('created_at')->label('Created At')->dateTime()->sortable()->searchable(),
+                TextColumn::make('updated_at')->label('Updated At')->dateTime()->sortable()->searchable(),
                 
             ])
             ->filters([
